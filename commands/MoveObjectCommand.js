@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -8,104 +8,89 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class MoveObjectCommand extends Command {
+  constructor(editor, object, newParent, newBefore) {
+    super(editor)
 
-	constructor( editor, object, newParent, newBefore ) {
+    this.type = 'MoveObjectCommand'
+    this.name = 'Move Object'
 
-		super( editor );
+    this.object = object
+    this.oldParent = object !== undefined ? object.parent : undefined
+    this.oldIndex =
+      this.oldParent !== undefined
+        ? this.oldParent.children.indexOf(this.object)
+        : undefined
+    this.newParent = newParent
 
-		this.type = 'MoveObjectCommand';
-		this.name = 'Move Object';
+    if (newBefore !== undefined) {
+      this.newIndex =
+        newParent !== undefined
+          ? newParent.children.indexOf(newBefore)
+          : undefined
+    } else {
+      this.newIndex =
+        newParent !== undefined ? newParent.children.length : undefined
+    }
 
-		this.object = object;
-		this.oldParent = ( object !== undefined ) ? object.parent : undefined;
-		this.oldIndex = ( this.oldParent !== undefined ) ? this.oldParent.children.indexOf( this.object ) : undefined;
-		this.newParent = newParent;
+    if (this.oldParent === this.newParent && this.newIndex > this.oldIndex) {
+      this.newIndex--
+    }
 
-		if ( newBefore !== undefined ) {
+    this.newBefore = newBefore
+  }
 
-			this.newIndex = ( newParent !== undefined ) ? newParent.children.indexOf( newBefore ) : undefined;
+  execute() {
+    this.oldParent.remove(this.object)
 
-		} else {
+    const children = this.newParent.children
+    children.splice(this.newIndex, 0, this.object)
+    this.object.parent = this.newParent
 
-			this.newIndex = ( newParent !== undefined ) ? newParent.children.length : undefined;
+    this.object.dispatchEvent({ type: 'added' })
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-		}
+  undo() {
+    this.newParent.remove(this.object)
 
-		if ( this.oldParent === this.newParent && this.newIndex > this.oldIndex ) {
+    const children = this.oldParent.children
+    children.splice(this.oldIndex, 0, this.object)
+    this.object.parent = this.oldParent
 
-			this.newIndex --;
+    this.object.dispatchEvent({ type: 'added' })
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-		}
+  toJSON() {
+    const output = super.toJSON(this)
 
-		this.newBefore = newBefore;
+    output.objectUuid = this.object.uuid
+    output.newParentUuid = this.newParent.uuid
+    output.oldParentUuid = this.oldParent.uuid
+    output.newIndex = this.newIndex
+    output.oldIndex = this.oldIndex
 
-	}
+    return output
+  }
 
-	execute() {
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		this.oldParent.remove( this.object );
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.oldParent = this.editor.objectByUuid(json.oldParentUuid)
+    if (this.oldParent === undefined) {
+      this.oldParent = this.editor.scene
+    }
 
-		const children = this.newParent.children;
-		children.splice( this.newIndex, 0, this.object );
-		this.object.parent = this.newParent;
+    this.newParent = this.editor.objectByUuid(json.newParentUuid)
 
-		this.object.dispatchEvent( { type: 'added' } );
-		this.editor.signals.sceneGraphChanged.dispatch();
+    if (this.newParent === undefined) {
+      this.newParent = this.editor.scene
+    }
 
-	}
-
-	undo() {
-
-		this.newParent.remove( this.object );
-
-		const children = this.oldParent.children;
-		children.splice( this.oldIndex, 0, this.object );
-		this.object.parent = this.oldParent;
-
-		this.object.dispatchEvent( { type: 'added' } );
-		this.editor.signals.sceneGraphChanged.dispatch();
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.newParentUuid = this.newParent.uuid;
-		output.oldParentUuid = this.oldParent.uuid;
-		output.newIndex = this.newIndex;
-		output.oldIndex = this.oldIndex;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.oldParent = this.editor.objectByUuid( json.oldParentUuid );
-		if ( this.oldParent === undefined ) {
-
-			this.oldParent = this.editor.scene;
-
-		}
-
-		this.newParent = this.editor.objectByUuid( json.newParentUuid );
-
-		if ( this.newParent === undefined ) {
-
-			this.newParent = this.editor.scene;
-
-		}
-
-		this.newIndex = json.newIndex;
-		this.oldIndex = json.oldIndex;
-
-	}
-
+    this.newIndex = json.newIndex
+    this.oldIndex = json.oldIndex
+  }
 }
 
-export { MoveObjectCommand };
+export { MoveObjectCommand }

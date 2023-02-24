@@ -1,99 +1,97 @@
 import {
-   UIPanel,
-   UIBreak,
-   UIButton,
-   UIDiv,
-   UIText,
-   UINumber,
-   UIRow,
-} from '../../public/libs/ui.js';
+  UIPanel,
+  UIBreak,
+  UIButton,
+  UIDiv,
+  UIText,
+  UINumber,
+  UIRow,
+} from '../../public/libs/ui.js'
 
 function SidebarAnimation(editor) {
-   const strings = editor.strings;
-   const signals = editor.signals;
-   const mixer = editor.mixer;
+  const strings = editor.strings
+  const signals = editor.signals
+  const mixer = editor.mixer
 
-   function getButtonText(action) {
-      return action.isRunning()
-         ? strings.getKey('sidebar/animations/stop')
-         : strings.getKey('sidebar/animations/play');
-   }
+  function getButtonText(action) {
+    return action.isRunning()
+      ? strings.getKey('sidebar/animations/stop')
+      : strings.getKey('sidebar/animations/play')
+  }
 
-   function Animation(animation, object) {
-      const action = mixer.clipAction(animation, object);
+  function Animation(animation, object) {
+    const action = mixer.clipAction(animation, object)
 
-      const container = new UIRow();
+    const container = new UIRow()
 
-      const name = new UIText(animation.name).setWidth('200px');
-      container.add(name);
+    const name = new UIText(animation.name).setWidth('200px')
+    container.add(name)
 
-      const button = new UIButton(getButtonText(action));
-      button.onClick(function () {
-         console.log(action);
+    const button = new UIButton(getButtonText(action))
+    button.onClick(function () {
+      console.log(action)
 
-         action.isRunning() ? action.stop() : action.play();
-         button.setTextContent(getButtonText(action));
-      });
+      action.isRunning() ? action.stop() : action.play()
+      button.setTextContent(getButtonText(action))
+    })
 
-      container.add(button);
+    container.add(button)
 
-      return container;
-   }
+    return container
+  }
 
-   signals.objectSelected.add(function (object) {
-      if (object !== null && object.animations.length > 0) {
-         animationsList.clear();
+  signals.objectSelected.add(function (object) {
+    if (object !== null && object.animations.length > 0) {
+      animationsList.clear()
 
-         const animations = object.animations;
+      const animations = object.animations
 
-         for (const animation of animations) {
-            animationsList.add(new Animation(animation, object));
-         }
-
-         container.setDisplay('');
-      } else {
-         container.setDisplay('none');
+      for (const animation of animations) {
+        animationsList.add(new Animation(animation, object))
       }
-   });
 
-   signals.objectRemoved.add(function (object) {
-      if (object !== null && object.animations.length > 0) {
-         mixer.uncacheRoot(object);
-      }
-   });
+      container.setDisplay('')
+    } else {
+      container.setDisplay('none')
+    }
+  })
 
-   const container = new UIPanel();
-   container.setDisplay('none');
+  signals.objectRemoved.add(function (object) {
+    if (object !== null && object.animations.length > 0) {
+      mixer.uncacheRoot(object)
+    }
+  })
 
-   container.add(
-      new UIText(strings.getKey('sidebar/animations')).setTextTransform(
-         'uppercase'
-      )
-   );
-   container.add(new UIBreak());
-   container.add(new UIBreak());
+  const container = new UIPanel()
+  container.setDisplay('none')
 
-   const animationsList = new UIDiv();
-   container.add(animationsList);
+  container.add(
+    new UIText(strings.getKey('sidebar/animations')).setTextTransform(
+      'uppercase'
+    )
+  )
+  container.add(new UIBreak())
+  container.add(new UIBreak())
 
-   const mixerTimeScaleRow = new UIRow();
-   const mixerTimeScaleNumber = new UINumber(0.5)
-      .setWidth('60px')
-      .setRange(-10, 10);
-   mixerTimeScaleNumber.onChange(function () {
-      mixer.timeScale = mixerTimeScaleNumber.getValue();
-   });
+  const animationsList = new UIDiv()
+  container.add(animationsList)
 
-   mixerTimeScaleRow.add(
-      new UIText(strings.getKey('sidebar/animations/timescale')).setWidth(
-         '90px'
-      )
-   );
-   mixerTimeScaleRow.add(mixerTimeScaleNumber);
+  const mixerTimeScaleRow = new UIRow()
+  const mixerTimeScaleNumber = new UINumber(0.5)
+    .setWidth('60px')
+    .setRange(-10, 10)
+  mixerTimeScaleNumber.onChange(function () {
+    mixer.timeScale = mixerTimeScaleNumber.getValue()
+  })
 
-   container.add(mixerTimeScaleRow);
+  mixerTimeScaleRow.add(
+    new UIText(strings.getKey('sidebar/animations/timescale')).setWidth('90px')
+  )
+  mixerTimeScaleRow.add(mixerTimeScaleNumber)
 
-   return container;
+  container.add(mixerTimeScaleRow)
+
+  return container
 }
 
-export { SidebarAnimation };
+export { SidebarAnimation }

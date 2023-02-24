@@ -1,90 +1,62 @@
 const LoaderUtils = {
+  createFilesMap: function (files) {
+    const map = {}
 
-	createFilesMap: function ( files ) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      map[file.name] = file
+    }
 
-		const map = {};
+    return map
+  },
 
-		for ( let i = 0; i < files.length; i ++ ) {
+  getFilesFromItemList: function (items, onDone) {
+    // TOFIX: setURLModifier() breaks when the file being loaded is not in root
 
-			const file = files[ i ];
-			map[ file.name ] = file;
+    let itemsCount = 0
+    let itemsTotal = 0
 
-		}
+    const files = []
+    const filesMap = {}
 
-		return map;
+    function onEntryHandled() {
+      itemsCount++
 
-	},
+      if (itemsCount === itemsTotal) {
+        onDone(files, filesMap)
+      }
+    }
 
-	getFilesFromItemList: function ( items, onDone ) {
+    function handleEntry(entry) {
+      if (entry.isDirectory) {
+        const reader = entry.createReader()
+        reader.readEntries(function (entries) {
+          for (let i = 0; i < entries.length; i++) {
+            handleEntry(entries[i])
+          }
 
-		// TOFIX: setURLModifier() breaks when the file being loaded is not in root
+          onEntryHandled()
+        })
+      } else if (entry.isFile) {
+        entry.file(function (file) {
+          files.push(file)
 
-		let itemsCount = 0;
-		let itemsTotal = 0;
+          filesMap[entry.fullPath.slice(1)] = file
+          onEntryHandled()
+        })
+      }
 
-		const files = [];
-		const filesMap = {};
+      itemsTotal++
+    }
 
-		function onEntryHandled() {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
 
-			itemsCount ++;
+      if (item.kind === 'file') {
+        handleEntry(item.webkitGetAsEntry())
+      }
+    }
+  },
+}
 
-			if ( itemsCount === itemsTotal ) {
-
-				onDone( files, filesMap );
-
-			}
-
-		}
-
-		function handleEntry( entry ) {
-
-			if ( entry.isDirectory ) {
-
-				const reader = entry.createReader();
-				reader.readEntries( function ( entries ) {
-
-					for ( let i = 0; i < entries.length; i ++ ) {
-
-						handleEntry( entries[ i ] );
-
-					}
-
-					onEntryHandled();
-
-				} );
-
-			} else if ( entry.isFile ) {
-
-				entry.file( function ( file ) {
-
-					files.push( file );
-
-					filesMap[ entry.fullPath.slice( 1 ) ] = file;
-					onEntryHandled();
-
-				} );
-
-			}
-
-			itemsTotal ++;
-
-		}
-
-		for ( let i = 0; i < items.length; i ++ ) {
-
-			const item = items[ i ];
-
-			if ( item.kind === 'file' ) {
-
-				handleEntry( item.webkitGetAsEntry() );
-
-			}
-
-		}
-
-	}
-
-};
-
-export { LoaderUtils };
+export { LoaderUtils }

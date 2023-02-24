@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -7,69 +7,53 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class AddScriptCommand extends Command {
+  constructor(editor, object, script) {
+    super(editor)
 
-	constructor( editor, object, script ) {
+    this.type = 'AddScriptCommand'
+    this.name = 'Add Script'
 
-		super( editor );
+    this.object = object
+    this.script = script
+  }
 
-		this.type = 'AddScriptCommand';
-		this.name = 'Add Script';
+  execute() {
+    if (this.editor.scripts[this.object.uuid] === undefined) {
+      this.editor.scripts[this.object.uuid] = []
+    }
 
-		this.object = object;
-		this.script = script;
+    this.editor.scripts[this.object.uuid].push(this.script)
 
-	}
+    this.editor.signals.scriptAdded.dispatch(this.script)
+  }
 
-	execute() {
+  undo() {
+    if (this.editor.scripts[this.object.uuid] === undefined) return
 
-		if ( this.editor.scripts[ this.object.uuid ] === undefined ) {
+    const index = this.editor.scripts[this.object.uuid].indexOf(this.script)
 
-			this.editor.scripts[ this.object.uuid ] = [];
+    if (index !== -1) {
+      this.editor.scripts[this.object.uuid].splice(index, 1)
+    }
 
-		}
+    this.editor.signals.scriptRemoved.dispatch(this.script)
+  }
 
-		this.editor.scripts[ this.object.uuid ].push( this.script );
+  toJSON() {
+    const output = super.toJSON(this)
 
-		this.editor.signals.scriptAdded.dispatch( this.script );
+    output.objectUuid = this.object.uuid
+    output.script = this.script
 
-	}
+    return output
+  }
 
-	undo() {
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		if ( this.editor.scripts[ this.object.uuid ] === undefined ) return;
-
-		const index = this.editor.scripts[ this.object.uuid ].indexOf( this.script );
-
-		if ( index !== - 1 ) {
-
-			this.editor.scripts[ this.object.uuid ].splice( index, 1 );
-
-		}
-
-		this.editor.signals.scriptRemoved.dispatch( this.script );
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.script = this.script;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.script = json.script;
-		this.object = this.editor.objectByUuid( json.objectUuid );
-
-	}
-
+    this.script = json.script
+    this.object = this.editor.objectByUuid(json.objectUuid)
+  }
 }
 
-export { AddScriptCommand };
+export { AddScriptCommand }

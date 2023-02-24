@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -8,66 +8,55 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class SetColorCommand extends Command {
+  constructor(editor, object, attributeName, newValue) {
+    super(editor)
 
-	constructor( editor, object, attributeName, newValue ) {
+    this.type = 'SetColorCommand'
+    this.name = `Set ${attributeName}`
+    this.updatable = true
 
-		super( editor );
+    this.object = object
+    this.attributeName = attributeName
+    this.oldValue =
+      object !== undefined
+        ? this.object[this.attributeName].getHex()
+        : undefined
+    this.newValue = newValue
+  }
 
-		this.type = 'SetColorCommand';
-		this.name = `Set ${attributeName}`;
-		this.updatable = true;
+  execute() {
+    this.object[this.attributeName].setHex(this.newValue)
+    this.editor.signals.objectChanged.dispatch(this.object)
+  }
 
-		this.object = object;
-		this.attributeName = attributeName;
-		this.oldValue = ( object !== undefined ) ? this.object[ this.attributeName ].getHex() : undefined;
-		this.newValue = newValue;
+  undo() {
+    this.object[this.attributeName].setHex(this.oldValue)
+    this.editor.signals.objectChanged.dispatch(this.object)
+  }
 
-	}
+  update(cmd) {
+    this.newValue = cmd.newValue
+  }
 
-	execute() {
+  toJSON() {
+    const output = super.toJSON(this)
 
-		this.object[ this.attributeName ].setHex( this.newValue );
-		this.editor.signals.objectChanged.dispatch( this.object );
+    output.objectUuid = this.object.uuid
+    output.attributeName = this.attributeName
+    output.oldValue = this.oldValue
+    output.newValue = this.newValue
 
-	}
+    return output
+  }
 
-	undo() {
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		this.object[ this.attributeName ].setHex( this.oldValue );
-		this.editor.signals.objectChanged.dispatch( this.object );
-
-	}
-
-	update( cmd ) {
-
-		this.newValue = cmd.newValue;
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.attributeName = this.attributeName;
-		output.oldValue = this.oldValue;
-		output.newValue = this.newValue;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.attributeName = json.attributeName;
-		this.oldValue = json.oldValue;
-		this.newValue = json.newValue;
-
-	}
-
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.attributeName = json.attributeName
+    this.oldValue = json.oldValue
+    this.newValue = json.newValue
+  }
 }
 
-export { SetColorCommand };
+export { SetColorCommand }

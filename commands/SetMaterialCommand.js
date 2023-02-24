@@ -1,5 +1,5 @@
-import { Command } from '../Command.js';
-import { ObjectLoader } from 'three';
+import { Command } from '../Command.js'
+import { ObjectLoader } from 'three'
 
 /**
  * @param editor Editor
@@ -8,68 +8,62 @@ import { ObjectLoader } from 'three';
  * @constructor
  */
 class SetMaterialCommand extends Command {
+  constructor(editor, object, newMaterial, materialSlot) {
+    super(editor)
 
-	constructor( editor, object, newMaterial, materialSlot ) {
+    this.type = 'SetMaterialCommand'
+    this.name = 'New Material'
 
-		super( editor );
+    this.object = object
+    this.materialSlot = materialSlot
 
-		this.type = 'SetMaterialCommand';
-		this.name = 'New Material';
+    this.oldMaterial = this.editor.getObjectMaterial(object, materialSlot)
+    this.newMaterial = newMaterial
+  }
 
-		this.object = object;
-		this.materialSlot = materialSlot;
+  execute() {
+    this.editor.setObjectMaterial(
+      this.object,
+      this.materialSlot,
+      this.newMaterial
+    )
+    this.editor.signals.materialChanged.dispatch(this.newMaterial)
+  }
 
-		this.oldMaterial = this.editor.getObjectMaterial( object, materialSlot );
-		this.newMaterial = newMaterial;
+  undo() {
+    this.editor.setObjectMaterial(
+      this.object,
+      this.materialSlot,
+      this.oldMaterial
+    )
+    this.editor.signals.materialChanged.dispatch(this.oldMaterial)
+  }
 
-	}
+  toJSON() {
+    const output = super.toJSON(this)
 
-	execute() {
+    output.objectUuid = this.object.uuid
+    output.oldMaterial = this.oldMaterial.toJSON()
+    output.newMaterial = this.newMaterial.toJSON()
 
-		this.editor.setObjectMaterial( this.object, this.materialSlot, this.newMaterial );
-		this.editor.signals.materialChanged.dispatch( this.newMaterial );
+    return output
+  }
 
-	}
+  fromJSON(json) {
+    super.fromJSON(json)
 
-	undo() {
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.oldMaterial = parseMaterial(json.oldMaterial)
+    this.newMaterial = parseMaterial(json.newMaterial)
 
-		this.editor.setObjectMaterial( this.object, this.materialSlot, this.oldMaterial );
-		this.editor.signals.materialChanged.dispatch( this.oldMaterial );
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.oldMaterial = this.oldMaterial.toJSON();
-		output.newMaterial = this.newMaterial.toJSON();
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.oldMaterial = parseMaterial( json.oldMaterial );
-		this.newMaterial = parseMaterial( json.newMaterial );
-
-		function parseMaterial( json ) {
-
-			const loader = new ObjectLoader();
-			const images = loader.parseImages( json.images );
-			const textures = loader.parseTextures( json.textures, images );
-			const materials = loader.parseMaterials( [ json ], textures );
-			return materials[ json.uuid ];
-
-		}
-
-	}
-
+    function parseMaterial(json) {
+      const loader = new ObjectLoader()
+      const images = loader.parseImages(json.images)
+      const textures = loader.parseTextures(json.textures, images)
+      const materials = loader.parseMaterials([json], textures)
+      return materials[json.uuid]
+    }
+  }
 }
 
-export { SetMaterialCommand };
+export { SetMaterialCommand }

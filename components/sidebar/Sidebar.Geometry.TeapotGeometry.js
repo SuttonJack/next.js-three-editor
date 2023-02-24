@@ -1,110 +1,110 @@
 import {
-   UIDiv,
-   UIRow,
-   UIText,
-   UIInteger,
-   UICheckbox,
-   UINumber,
-} from '../../public/libs/ui.js';
+  UIDiv,
+  UIRow,
+  UIText,
+  UIInteger,
+  UICheckbox,
+  UINumber,
+} from '../../public/libs/ui.js'
 
-import { TeapotGeometry } from 'three/examples/jsm/geometries/TeapotGeometry.js';
+import { TeapotGeometry } from 'three/examples/jsm/geometries/TeapotGeometry.js'
 
 function GeometryParametersPanel(signals, object) {
-   const container = new UIDiv();
+  const container = new UIDiv()
 
-   const parameters = object.geometry.parameters;
+  const parameters = object.geometry.parameters
 
-   // size
+  // size
 
-   const sizeRow = new UIRow();
-   const size = new UINumber(parameters.size).onChange(update);
+  const sizeRow = new UIRow()
+  const size = new UINumber(parameters.size).onChange(update)
 
-   sizeRow.add(new UIText('Size').setWidth('90px'));
-   sizeRow.add(size);
+  sizeRow.add(new UIText('Size').setWidth('90px'))
+  sizeRow.add(size)
 
-   container.add(sizeRow);
+  container.add(sizeRow)
 
-   // segments
+  // segments
 
-   const segmentsRow = new UIRow();
-   const segments = new UIInteger(parameters.segments)
-      .setRange(1, Infinity)
-      .onChange(update);
+  const segmentsRow = new UIRow()
+  const segments = new UIInteger(parameters.segments)
+    .setRange(1, Infinity)
+    .onChange(update)
 
-   segmentsRow.add(new UIText('Segments').setWidth('90px'));
-   segmentsRow.add(segments);
+  segmentsRow.add(new UIText('Segments').setWidth('90px'))
+  segmentsRow.add(segments)
 
-   container.add(segmentsRow);
+  container.add(segmentsRow)
 
-   // bottom
+  // bottom
 
-   const bottomRow = new UIRow();
-   const bottom = new UICheckbox(parameters.bottom).onChange(update);
+  const bottomRow = new UIRow()
+  const bottom = new UICheckbox(parameters.bottom).onChange(update)
 
-   bottomRow.add(new UIText('Bottom').setWidth('90px'));
-   bottomRow.add(bottom);
+  bottomRow.add(new UIText('Bottom').setWidth('90px'))
+  bottomRow.add(bottom)
 
-   container.add(bottomRow);
+  container.add(bottomRow)
 
-   // lid
+  // lid
 
-   const lidRow = new UIRow();
-   const lid = new UICheckbox(parameters.lid).onChange(update);
+  const lidRow = new UIRow()
+  const lid = new UICheckbox(parameters.lid).onChange(update)
 
-   lidRow.add(new UIText('Lid').setWidth('90px'));
-   lidRow.add(lid);
+  lidRow.add(new UIText('Lid').setWidth('90px'))
+  lidRow.add(lid)
 
-   container.add(lidRow);
+  container.add(lidRow)
 
-   // body
+  // body
 
-   const bodyRow = new UIRow();
-   const body = new UICheckbox(parameters.body).onChange(update);
+  const bodyRow = new UIRow()
+  const body = new UICheckbox(parameters.body).onChange(update)
 
-   bodyRow.add(new UIText('Body').setWidth('90px'));
-   bodyRow.add(body);
+  bodyRow.add(new UIText('Body').setWidth('90px'))
+  bodyRow.add(body)
 
-   container.add(bodyRow);
+  container.add(bodyRow)
 
-   // fitted lid
+  // fitted lid
 
-   const fitLidRow = new UIRow();
-   const fitLid = new UICheckbox(parameters.fitLid).onChange(update);
+  const fitLidRow = new UIRow()
+  const fitLid = new UICheckbox(parameters.fitLid).onChange(update)
 
-   fitLidRow.add(new UIText('Fitted Lid').setWidth('90px'));
-   fitLidRow.add(fitLid);
+  fitLidRow.add(new UIText('Fitted Lid').setWidth('90px'))
+  fitLidRow.add(fitLid)
 
-   container.add(fitLidRow);
+  container.add(fitLidRow)
 
-   // blinn-sized
+  // blinn-sized
 
-   const blinnRow = new UIRow();
-   const blinn = new UICheckbox(parameters.blinn).onChange(update);
+  const blinnRow = new UIRow()
+  const blinn = new UICheckbox(parameters.blinn).onChange(update)
 
-   blinnRow.add(new UIText('Blinn-scaled').setWidth('90px'));
-   blinnRow.add(blinn);
+  blinnRow.add(new UIText('Blinn-scaled').setWidth('90px'))
+  blinnRow.add(blinn)
 
-   container.add(blinnRow);
+  container.add(blinnRow)
 
-   function update() {
-      object.geometry.dispose();
+  function update() {
+    object.geometry.dispose()
 
-      object.geometry = new TeapotGeometry(
-         size.getValue(),
-         segments.getValue(),
-         bottom.getValue(),
-         lid.getValue(),
-         body.getValue(),
-         fitLid.getValue(),
-         blinn.getValue()
-      );
+    object.geometry = new TeapotGeometry(
+      size.getValue(),
+      segments.getValue(),
+      bottom.getValue(),
+      lid.getValue(),
+      body.getValue(),
+      fitLid.getValue(),
+      blinn.getValue()
+    )
 
-      object.geometry.computeBoundingSphere();
+    object.geometry.computeBoundingSphere()
 
-      signals.geometryChanged.dispatch(object);
-   }
+    signals.geometryChanged.dispatch(object)
+  }
 
-   return container;
+  return container
 }
 
-export { GeometryParametersPanel };
+export { GeometryParametersPanel }

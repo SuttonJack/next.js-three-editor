@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -8,63 +8,52 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class SetGeometryValueCommand extends Command {
+  constructor(editor, object, attributeName, newValue) {
+    super(editor)
 
-	constructor( editor, object, attributeName, newValue ) {
+    this.type = 'SetGeometryValueCommand'
+    this.name = `Set Geometry.${attributeName}`
 
-		super( editor );
+    this.object = object
+    this.attributeName = attributeName
+    this.oldValue =
+      object !== undefined ? object.geometry[attributeName] : undefined
+    this.newValue = newValue
+  }
 
-		this.type = 'SetGeometryValueCommand';
-		this.name = `Set Geometry.${attributeName}`;
+  execute() {
+    this.object.geometry[this.attributeName] = this.newValue
+    this.editor.signals.objectChanged.dispatch(this.object)
+    this.editor.signals.geometryChanged.dispatch()
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-		this.object = object;
-		this.attributeName = attributeName;
-		this.oldValue = ( object !== undefined ) ? object.geometry[ attributeName ] : undefined;
-		this.newValue = newValue;
+  undo() {
+    this.object.geometry[this.attributeName] = this.oldValue
+    this.editor.signals.objectChanged.dispatch(this.object)
+    this.editor.signals.geometryChanged.dispatch()
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-	}
+  toJSON() {
+    const output = super.toJSON(this)
 
-	execute() {
+    output.objectUuid = this.object.uuid
+    output.attributeName = this.attributeName
+    output.oldValue = this.oldValue
+    output.newValue = this.newValue
 
-		this.object.geometry[ this.attributeName ] = this.newValue;
-		this.editor.signals.objectChanged.dispatch( this.object );
-		this.editor.signals.geometryChanged.dispatch();
-		this.editor.signals.sceneGraphChanged.dispatch();
+    return output
+  }
 
-	}
+  fromJSON(json) {
+    super.fromJSON(json)
 
-	undo() {
-
-		this.object.geometry[ this.attributeName ] = this.oldValue;
-		this.editor.signals.objectChanged.dispatch( this.object );
-		this.editor.signals.geometryChanged.dispatch();
-		this.editor.signals.sceneGraphChanged.dispatch();
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.attributeName = this.attributeName;
-		output.oldValue = this.oldValue;
-		output.newValue = this.newValue;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.attributeName = json.attributeName;
-		this.oldValue = json.oldValue;
-		this.newValue = json.newValue;
-
-	}
-
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.attributeName = json.attributeName
+    this.oldValue = json.oldValue
+    this.newValue = json.newValue
+  }
 }
 
-export { SetGeometryValueCommand };
+export { SetGeometryValueCommand }

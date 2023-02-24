@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -7,64 +7,50 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class SetUuidCommand extends Command {
+  constructor(editor, object, newUuid) {
+    super(editor)
 
-	constructor( editor, object, newUuid ) {
+    this.type = 'SetUuidCommand'
+    this.name = 'Update UUID'
 
-		super( editor );
+    this.object = object
 
-		this.type = 'SetUuidCommand';
-		this.name = 'Update UUID';
+    this.oldUuid = object !== undefined ? object.uuid : undefined
+    this.newUuid = newUuid
+  }
 
-		this.object = object;
+  execute() {
+    this.object.uuid = this.newUuid
+    this.editor.signals.objectChanged.dispatch(this.object)
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-		this.oldUuid = ( object !== undefined ) ? object.uuid : undefined;
-		this.newUuid = newUuid;
+  undo() {
+    this.object.uuid = this.oldUuid
+    this.editor.signals.objectChanged.dispatch(this.object)
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-	}
+  toJSON() {
+    const output = super.toJSON(this)
 
-	execute() {
+    output.oldUuid = this.oldUuid
+    output.newUuid = this.newUuid
 
-		this.object.uuid = this.newUuid;
-		this.editor.signals.objectChanged.dispatch( this.object );
-		this.editor.signals.sceneGraphChanged.dispatch();
+    return output
+  }
 
-	}
+  fromJSON(json) {
+    super.fromJSON(json)
 
-	undo() {
+    this.oldUuid = json.oldUuid
+    this.newUuid = json.newUuid
+    this.object = this.editor.objectByUuid(json.oldUuid)
 
-		this.object.uuid = this.oldUuid;
-		this.editor.signals.objectChanged.dispatch( this.object );
-		this.editor.signals.sceneGraphChanged.dispatch();
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.oldUuid = this.oldUuid;
-		output.newUuid = this.newUuid;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.oldUuid = json.oldUuid;
-		this.newUuid = json.newUuid;
-		this.object = this.editor.objectByUuid( json.oldUuid );
-
-		if ( this.object === undefined ) {
-
-			this.object = this.editor.objectByUuid( json.newUuid );
-
-		}
-
-	}
-
+    if (this.object === undefined) {
+      this.object = this.editor.objectByUuid(json.newUuid)
+    }
+  }
 }
 
-export { SetUuidCommand };
+export { SetUuidCommand }

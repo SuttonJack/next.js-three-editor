@@ -1,4 +1,4 @@
-import { Command } from '../Command.js';
+import { Command } from '../Command.js'
 
 /**
  * @param editor Editor
@@ -8,71 +8,63 @@ import { Command } from '../Command.js';
  * @constructor
  */
 class SetMaterialColorCommand extends Command {
+  constructor(editor, object, attributeName, newValue, materialSlot) {
+    super(editor)
 
-	constructor( editor, object, attributeName, newValue, materialSlot ) {
+    this.type = 'SetMaterialColorCommand'
+    this.name = `Set Material.${attributeName}`
+    this.updatable = true
 
-		super( editor );
+    this.object = object
+    this.material =
+      this.object !== undefined
+        ? this.editor.getObjectMaterial(object, materialSlot)
+        : undefined
 
-		this.type = 'SetMaterialColorCommand';
-		this.name = `Set Material.${attributeName}`;
-		this.updatable = true;
+    this.oldValue =
+      this.material !== undefined
+        ? this.material[attributeName].getHex()
+        : undefined
+    this.newValue = newValue
 
-		this.object = object;
-		this.material = ( this.object !== undefined ) ? this.editor.getObjectMaterial( object, materialSlot ) : undefined;
+    this.attributeName = attributeName
+  }
 
-		this.oldValue = ( this.material !== undefined ) ? this.material[ attributeName ].getHex() : undefined;
-		this.newValue = newValue;
+  execute() {
+    this.material[this.attributeName].setHex(this.newValue)
 
-		this.attributeName = attributeName;
+    this.editor.signals.materialChanged.dispatch(this.material)
+  }
 
-	}
+  undo() {
+    this.material[this.attributeName].setHex(this.oldValue)
 
-	execute() {
+    this.editor.signals.materialChanged.dispatch(this.material)
+  }
 
-		this.material[ this.attributeName ].setHex( this.newValue );
+  update(cmd) {
+    this.newValue = cmd.newValue
+  }
 
-		this.editor.signals.materialChanged.dispatch( this.material );
+  toJSON() {
+    const output = super.toJSON(this)
 
-	}
+    output.objectUuid = this.object.uuid
+    output.attributeName = this.attributeName
+    output.oldValue = this.oldValue
+    output.newValue = this.newValue
 
-	undo() {
+    return output
+  }
 
-		this.material[ this.attributeName ].setHex( this.oldValue );
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		this.editor.signals.materialChanged.dispatch( this.material );
-
-	}
-
-	update( cmd ) {
-
-		this.newValue = cmd.newValue;
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.attributeName = this.attributeName;
-		output.oldValue = this.oldValue;
-		output.newValue = this.newValue;
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.attributeName = json.attributeName;
-		this.oldValue = json.oldValue;
-		this.newValue = json.newValue;
-
-	}
-
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.attributeName = json.attributeName
+    this.oldValue = json.oldValue
+    this.newValue = json.newValue
+  }
 }
 
-export { SetMaterialColorCommand };
+export { SetMaterialColorCommand }

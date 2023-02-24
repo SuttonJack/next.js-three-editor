@@ -1,28 +1,28 @@
-import { UIDiv, UIRow, UIButton } from '../../public/libs/ui.js';
+import { UIDiv, UIRow, UIButton } from '../../public/libs/ui.js'
 
 function SidebarGeometryModifiers(editor, object) {
-   const signals = editor.signals;
+  const signals = editor.signals
 
-   const container = new UIDiv().setPaddingLeft('90px');
+  const container = new UIDiv().setPaddingLeft('90px')
 
-   const geometry = object.geometry;
+  const geometry = object.geometry
 
-   // Compute Vertex Normals
+  // Compute Vertex Normals
 
-   const button = new UIButton('Compute Vertex Normals');
-   button.onClick(function () {
-      geometry.computeVertexNormals();
+  const button = new UIButton('Compute Vertex Normals')
+  button.onClick(function () {
+    geometry.computeVertexNormals()
 
-      geometry.attributes.normal.needsUpdate = true;
+    geometry.attributes.normal.needsUpdate = true
 
-      signals.geometryChanged.dispatch(object);
-   });
+    signals.geometryChanged.dispatch(object)
+  })
 
-   container.add(button);
+  container.add(button)
 
-   //
+  //
 
-   return container;
+  return container
 }
 
-export { SidebarGeometryModifiers };
+export { SidebarGeometryModifiers }

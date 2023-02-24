@@ -1,33 +1,33 @@
-import { UITabbedPanel } from '../../public/libs/ui.js';
+import { UITabbedPanel } from '../../public/libs/ui.js'
 
-import { SidebarObject } from './Sidebar.Object.js';
-import { SidebarGeometry } from './Sidebar.Geometry.js';
-import { SidebarMaterial } from './Sidebar.Material.js';
+import { SidebarObject } from './Sidebar.Object.js'
+import { SidebarGeometry } from './Sidebar.Geometry.js'
+import { SidebarMaterial } from './Sidebar.Material.js'
 
 function SidebarProperties(editor) {
-   const strings = editor.strings;
+  const strings = editor.strings
 
-   const container = new UITabbedPanel();
-   container.setId('properties');
+  const container = new UITabbedPanel()
+  container.setId('properties')
 
-   container.addTab(
-      'object',
-      strings.getKey('sidebar/properties/object'),
-      new SidebarObject(editor)
-   );
-   container.addTab(
-      'geometry',
-      strings.getKey('sidebar/properties/geometry'),
-      new SidebarGeometry(editor)
-   );
-   container.addTab(
-      'material',
-      strings.getKey('sidebar/properties/material'),
-      new SidebarMaterial(editor)
-   );
-   container.select('object');
+  container.addTab(
+    'object',
+    strings.getKey('sidebar/properties/object'),
+    new SidebarObject(editor)
+  )
+  container.addTab(
+    'geometry',
+    strings.getKey('sidebar/properties/geometry'),
+    new SidebarGeometry(editor)
+  )
+  container.addTab(
+    'material',
+    strings.getKey('sidebar/properties/material'),
+    new SidebarMaterial(editor)
+  )
+  container.select('object')
 
-   return container;
+  return container
 }
 
-export { SidebarProperties };
+export { SidebarProperties }

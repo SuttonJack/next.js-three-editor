@@ -1,5 +1,5 @@
-import { Command } from '../Command.js';
-import { ObjectLoader } from 'three';
+import { Command } from '../Command.js'
+import { ObjectLoader } from 'three'
 
 /**
  * @param editor Editor
@@ -7,61 +7,45 @@ import { ObjectLoader } from 'three';
  * @constructor
  */
 class AddObjectCommand extends Command {
+  constructor(editor, object) {
+    super(editor)
 
-	constructor( editor, object ) {
+    this.type = 'AddObjectCommand'
 
-		super( editor );
+    this.object = object
+    if (object !== undefined) {
+      this.name = `Add Object: ${object.name}`
+    }
+  }
 
-		this.type = 'AddObjectCommand';
+  execute() {
+    this.editor.addObject(this.object)
+    this.editor.select(this.object)
+  }
 
-		this.object = object;
-		if ( object !== undefined ) {
+  undo() {
+    this.editor.removeObject(this.object)
+    this.editor.deselect()
+  }
 
-			this.name = `Add Object: ${object.name}`;
+  toJSON() {
+    const output = super.toJSON(this)
 
-		}
+    output.object = this.object.toJSON()
 
-	}
+    return output
+  }
 
-	execute() {
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		this.editor.addObject( this.object );
-		this.editor.select( this.object );
+    this.object = this.editor.objectByUuid(json.object.object.uuid)
 
-	}
-
-	undo() {
-
-		this.editor.removeObject( this.object );
-		this.editor.deselect();
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.object = this.object.toJSON();
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.object.object.uuid );
-
-		if ( this.object === undefined ) {
-
-			const loader = new ObjectLoader();
-			this.object = loader.parse( json.object );
-
-		}
-
-	}
-
+    if (this.object === undefined) {
+      const loader = new ObjectLoader()
+      this.object = loader.parse(json.object)
+    }
+  }
 }
 
-export { AddObjectCommand };
+export { AddObjectCommand }

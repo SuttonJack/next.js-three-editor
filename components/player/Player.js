@@ -1,43 +1,43 @@
-import { UIPanel } from '../../public/libs/ui.js';
-import { APP } from '../../public/libs/app.js';
+import { UIPanel } from '../../public/libs/ui.js'
+import { APP } from '../../public/libs/app.js'
 
 function Player(editor) {
-   const signals = editor.signals;
+  const signals = editor.signals
 
-   const container = new UIPanel();
-   container.setId('player');
-   container.setPosition('absolute');
-   container.setDisplay('none');
+  const container = new UIPanel()
+  container.setId('player')
+  container.setPosition('absolute')
+  container.setDisplay('none')
 
-   //
+  //
 
-   const player = new APP.Player();
-   container.dom.appendChild(player.dom);
+  const player = new APP.Player()
+  container.dom.appendChild(player.dom)
 
-   window.addEventListener('resize', function () {
-      player.setSize(container.dom.clientWidth, container.dom.clientHeight);
-   });
+  window.addEventListener('resize', function () {
+    player.setSize(container.dom.clientWidth, container.dom.clientHeight)
+  })
 
-   signals.windowResize.add(function () {
-      player.setSize(container.dom.clientWidth, container.dom.clientHeight);
-   });
+  signals.windowResize.add(function () {
+    player.setSize(container.dom.clientWidth, container.dom.clientHeight)
+  })
 
-   signals.startPlayer.add(function () {
-      container.setDisplay('');
+  signals.startPlayer.add(function () {
+    container.setDisplay('')
 
-      player.load(editor.toJSON());
-      player.setSize(container.dom.clientWidth, container.dom.clientHeight);
-      player.play();
-   });
+    player.load(editor.toJSON())
+    player.setSize(container.dom.clientWidth, container.dom.clientHeight)
+    player.play()
+  })
 
-   signals.stopPlayer.add(function () {
-      container.setDisplay('none');
+  signals.stopPlayer.add(function () {
+    container.setDisplay('none')
 
-      player.stop();
-      player.dispose();
-   });
+    player.stop()
+    player.dispose()
+  })
 
-   return container;
+  return container
 }
 
-export { Player };
+export { Player }

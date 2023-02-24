@@ -1,5 +1,5 @@
-import { Command } from '../Command.js';
-import { Euler } from 'three';
+import { Command } from '../Command.js'
+import { Euler } from 'three'
 
 /**
  * @param editor Editor
@@ -9,76 +9,58 @@ import { Euler } from 'three';
  * @constructor
  */
 class SetRotationCommand extends Command {
+  constructor(editor, object, newRotation, optionalOldRotation) {
+    super(editor)
 
-	constructor( editor, object, newRotation, optionalOldRotation ) {
+    this.type = 'SetRotationCommand'
+    this.name = 'Set Rotation'
+    this.updatable = true
 
-		super( editor );
+    this.object = object
 
-		this.type = 'SetRotationCommand';
-		this.name = 'Set Rotation';
-		this.updatable = true;
+    if (object !== undefined && newRotation !== undefined) {
+      this.oldRotation = object.rotation.clone()
+      this.newRotation = newRotation.clone()
+    }
 
-		this.object = object;
+    if (optionalOldRotation !== undefined) {
+      this.oldRotation = optionalOldRotation.clone()
+    }
+  }
 
-		if ( object !== undefined && newRotation !== undefined ) {
+  execute() {
+    this.object.rotation.copy(this.newRotation)
+    this.object.updateMatrixWorld(true)
+    this.editor.signals.objectChanged.dispatch(this.object)
+  }
 
-			this.oldRotation = object.rotation.clone();
-			this.newRotation = newRotation.clone();
+  undo() {
+    this.object.rotation.copy(this.oldRotation)
+    this.object.updateMatrixWorld(true)
+    this.editor.signals.objectChanged.dispatch(this.object)
+  }
 
-		}
+  update(command) {
+    this.newRotation.copy(command.newRotation)
+  }
 
-		if ( optionalOldRotation !== undefined ) {
+  toJSON() {
+    const output = super.toJSON(this)
 
-			this.oldRotation = optionalOldRotation.clone();
+    output.objectUuid = this.object.uuid
+    output.oldRotation = this.oldRotation.toArray()
+    output.newRotation = this.newRotation.toArray()
 
-		}
+    return output
+  }
 
-	}
+  fromJSON(json) {
+    super.fromJSON(json)
 
-	execute() {
-
-		this.object.rotation.copy( this.newRotation );
-		this.object.updateMatrixWorld( true );
-		this.editor.signals.objectChanged.dispatch( this.object );
-
-	}
-
-	undo() {
-
-		this.object.rotation.copy( this.oldRotation );
-		this.object.updateMatrixWorld( true );
-		this.editor.signals.objectChanged.dispatch( this.object );
-
-	}
-
-	update( command ) {
-
-		this.newRotation.copy( command.newRotation );
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.oldRotation = this.oldRotation.toArray();
-		output.newRotation = this.newRotation.toArray();
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-		this.oldRotation = new Euler().fromArray( json.oldRotation );
-		this.newRotation = new Euler().fromArray( json.newRotation );
-
-	}
-
+    this.object = this.editor.objectByUuid(json.objectUuid)
+    this.oldRotation = new Euler().fromArray(json.oldRotation)
+    this.newRotation = new Euler().fromArray(json.newRotation)
+  }
 }
 
-export { SetRotationCommand };
+export { SetRotationCommand }

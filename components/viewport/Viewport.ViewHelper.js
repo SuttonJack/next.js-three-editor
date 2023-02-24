@@ -1,31 +1,31 @@
-import { UIPanel } from '../../public/libs/ui.js';
+import { UIPanel } from '../../public/libs/ui.js'
 
-import { ViewHelper as ViewHelperBase } from 'three/examples/jsm/helpers/ViewHelper.js';
+import { ViewHelper as ViewHelperBase } from 'three/examples/jsm/helpers/ViewHelper.js'
 
 class ViewHelper extends ViewHelperBase {
-   constructor(editorCamera, container) {
-      super(editorCamera, container.dom);
+  constructor(editorCamera, container) {
+    super(editorCamera, container.dom)
 
-      const panel = new UIPanel();
-      panel.setId('viewHelper');
-      panel.setPosition('absolute');
-      panel.setRight('0px');
-      panel.setBottom('0px');
-      panel.setHeight('128px');
-      panel.setWidth('128px');
+    const panel = new UIPanel()
+    panel.setId('viewHelper')
+    panel.setPosition('absolute')
+    panel.setRight('0px')
+    panel.setBottom('0px')
+    panel.setHeight('128px')
+    panel.setWidth('128px')
 
-      panel.dom.addEventListener('pointerup', (event) => {
-         event.stopPropagation();
+    panel.dom.addEventListener('pointerup', (event) => {
+      event.stopPropagation()
 
-         this.handleClick(event);
-      });
+      this.handleClick(event)
+    })
 
-      panel.dom.addEventListener('pointerdown', function (event) {
-         event.stopPropagation();
-      });
+    panel.dom.addEventListener('pointerdown', function (event) {
+      event.stopPropagation()
+    })
 
-      container.add(panel);
-   }
+    container.add(panel)
+  }
 }
 
-export { ViewHelper };
+export { ViewHelper }

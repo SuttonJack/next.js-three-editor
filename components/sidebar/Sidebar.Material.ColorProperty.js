@@ -1,84 +1,84 @@
-import { UIColor, UINumber, UIRow, UIText } from '../../public/libs/ui.js';
-import { SetMaterialColorCommand } from '../../commands/SetMaterialColorCommand.js';
-import { SetMaterialValueCommand } from '../../commands/SetMaterialValueCommand.js';
+import { UIColor, UINumber, UIRow, UIText } from '../../public/libs/ui.js'
+import { SetMaterialColorCommand } from '../../commands/SetMaterialColorCommand.js'
+import { SetMaterialValueCommand } from '../../commands/SetMaterialValueCommand.js'
 
 function SidebarMaterialColorProperty(editor, property, name) {
-   const signals = editor.signals;
+  const signals = editor.signals
 
-   const container = new UIRow();
-   container.add(new UIText(name).setWidth('90px'));
+  const container = new UIRow()
+  container.add(new UIText(name).setWidth('90px'))
 
-   const color = new UIColor().onInput(onChange);
-   container.add(color);
+  const color = new UIColor().onInput(onChange)
+  container.add(color)
 
-   let intensity;
+  let intensity
 
-   if (property === 'emissive') {
-      intensity = new UINumber().setWidth('30px').onChange(onChange);
-      container.add(intensity);
-   }
+  if (property === 'emissive') {
+    intensity = new UINumber().setWidth('30px').onChange(onChange)
+    container.add(intensity)
+  }
 
-   let object = null;
-   let material = null;
+  let object = null
+  let material = null
 
-   function onChange() {
-      if (material[property].getHex() !== color.getHexValue()) {
-         editor.execute(
-            new SetMaterialColorCommand(
-               editor,
-               object,
-               property,
-               color.getHexValue(),
-               0 /* TODO: currentMaterialSlot */
-            )
-         );
+  function onChange() {
+    if (material[property].getHex() !== color.getHexValue()) {
+      editor.execute(
+        new SetMaterialColorCommand(
+          editor,
+          object,
+          property,
+          color.getHexValue(),
+          0 /* TODO: currentMaterialSlot */
+        )
+      )
+    }
+
+    if (intensity !== undefined) {
+      if (material[`${property}Intensity`] !== intensity.getValue()) {
+        editor.execute(
+          new SetMaterialValueCommand(
+            editor,
+            object,
+            `${property}Intensity`,
+            intensity.getValue(),
+            /* TODO: currentMaterialSlot*/ 0
+          )
+        )
       }
+    }
+  }
+
+  function update() {
+    if (object === null) return
+    if (object.material === undefined) return
+
+    material = object.material
+
+    if (property in material) {
+      color.setHexValue(material[property].getHexString())
 
       if (intensity !== undefined) {
-         if (material[`${property}Intensity`] !== intensity.getValue()) {
-            editor.execute(
-               new SetMaterialValueCommand(
-                  editor,
-                  object,
-                  `${property}Intensity`,
-                  intensity.getValue(),
-                  /* TODO: currentMaterialSlot*/ 0
-               )
-            );
-         }
+        intensity.setValue(material[`${property}Intensity`])
       }
-   }
 
-   function update() {
-      if (object === null) return;
-      if (object.material === undefined) return;
+      container.setDisplay('')
+    } else {
+      container.setDisplay('none')
+    }
+  }
 
-      material = object.material;
+  //
 
-      if (property in material) {
-         color.setHexValue(material[property].getHexString());
+  signals.objectSelected.add(function (selected) {
+    object = selected
 
-         if (intensity !== undefined) {
-            intensity.setValue(material[`${property}Intensity`]);
-         }
+    update()
+  })
 
-         container.setDisplay('');
-      } else {
-         container.setDisplay('none');
-      }
-   }
+  signals.materialChanged.add(update)
 
-   //
-
-   signals.objectSelected.add(function (selected) {
-      object = selected;
-
-      update();
-   });
-
-   signals.materialChanged.add(update);
-
-   return container;
+  return container
 }
 
-export { SidebarMaterialColorProperty };
+export { SidebarMaterialColorProperty }

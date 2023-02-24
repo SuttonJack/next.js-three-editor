@@ -1,73 +1,73 @@
-import * as THREE from 'three';
+import * as THREE from 'three'
 
 import {
-   UIDiv,
-   UIRow,
-   UIText,
-   UIInteger,
-   UIButton,
-} from '../../public/libs/ui.js';
+  UIDiv,
+  UIRow,
+  UIText,
+  UIInteger,
+  UIButton,
+} from '../../public/libs/ui.js'
 
-import { SetGeometryCommand } from '../../commands/SetGeometryCommand.js';
+import { SetGeometryCommand } from '../../commands/SetGeometryCommand.js'
 
 function GeometryParametersPanel(editor, object) {
-   const strings = editor.strings;
+  const strings = editor.strings
 
-   const container = new UIDiv();
+  const container = new UIDiv()
 
-   const geometry = object.geometry;
-   const parameters = geometry.parameters;
+  const geometry = object.geometry
+  const parameters = geometry.parameters
 
-   // curveSegments
+  // curveSegments
 
-   const curveSegmentsRow = new UIRow();
-   const curveSegments = new UIInteger(parameters.curveSegments || 12)
-      .onChange(changeShape)
-      .setRange(1, Infinity);
+  const curveSegmentsRow = new UIRow()
+  const curveSegments = new UIInteger(parameters.curveSegments || 12)
+    .onChange(changeShape)
+    .setRange(1, Infinity)
 
-   curveSegmentsRow.add(
-      new UIText(
-         strings.getKey('sidebar/geometry/shape_geometry/curveSegments')
-      ).setWidth('90px')
-   );
-   curveSegmentsRow.add(curveSegments);
+  curveSegmentsRow.add(
+    new UIText(
+      strings.getKey('sidebar/geometry/shape_geometry/curveSegments')
+    ).setWidth('90px')
+  )
+  curveSegmentsRow.add(curveSegments)
 
-   container.add(curveSegmentsRow);
+  container.add(curveSegmentsRow)
 
-   // to extrude
-   const button = new UIButton(
-      strings.getKey('sidebar/geometry/shape_geometry/extrude')
-   )
-      .onClick(toExtrude)
-      .setWidth('90px')
-      .setMarginLeft('90px');
-   container.add(button);
+  // to extrude
+  const button = new UIButton(
+    strings.getKey('sidebar/geometry/shape_geometry/extrude')
+  )
+    .onClick(toExtrude)
+    .setWidth('90px')
+    .setMarginLeft('90px')
+  container.add(button)
 
-   //
+  //
 
-   function changeShape() {
-      editor.execute(
-         new SetGeometryCommand(
-            editor,
-            object,
-            new THREE.ShapeGeometry(parameters.shapes, curveSegments.getValue())
-         )
-      );
-   }
+  function changeShape() {
+    editor.execute(
+      new SetGeometryCommand(
+        editor,
+        object,
+        new THREE.ShapeGeometry(parameters.shapes, curveSegments.getValue())
+      )
+    )
+  }
 
-   function toExtrude() {
-      editor.execute(
-         new SetGeometryCommand(
-            editor,
-            object,
-            new THREE.ExtrudeGeometry(parameters.shapes, {
-               curveSegments: curveSegments.getValue(),
-            })
-         )
-      );
-   }
+  function toExtrude() {
+    editor.execute(
+      new SetGeometryCommand(
+        editor,
+        object,
+        new THREE.ExtrudeGeometry(parameters.shapes, {
+          curveSegments: curveSegments.getValue(),
+        })
+      )
+    )
+  }
 
-   return container;
+  return container
 }
 
-export { GeometryParametersPanel };
+export { GeometryParametersPanel }

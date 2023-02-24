@@ -1,5 +1,5 @@
-import { Command } from '../Command.js';
-import { ObjectLoader } from 'three';
+import { Command } from '../Command.js'
+import { ObjectLoader } from 'three'
 
 /**
  * @param editor Editor
@@ -9,79 +9,63 @@ import { ObjectLoader } from 'three';
  */
 
 class SetGeometryCommand extends Command {
+  constructor(editor, object, newGeometry) {
+    super(editor)
 
-	constructor( editor, object, newGeometry ) {
+    this.type = 'SetGeometryCommand'
+    this.name = 'Set Geometry'
+    this.updatable = true
 
-		super( editor );
+    this.object = object
+    this.oldGeometry = object !== undefined ? object.geometry : undefined
+    this.newGeometry = newGeometry
+  }
 
-		this.type = 'SetGeometryCommand';
-		this.name = 'Set Geometry';
-		this.updatable = true;
+  execute() {
+    this.object.geometry.dispose()
+    this.object.geometry = this.newGeometry
+    this.object.geometry.computeBoundingSphere()
 
-		this.object = object;
-		this.oldGeometry = ( object !== undefined ) ? object.geometry : undefined;
-		this.newGeometry = newGeometry;
+    this.editor.signals.geometryChanged.dispatch(this.object)
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-	}
+  undo() {
+    this.object.geometry.dispose()
+    this.object.geometry = this.oldGeometry
+    this.object.geometry.computeBoundingSphere()
 
-	execute() {
+    this.editor.signals.geometryChanged.dispatch(this.object)
+    this.editor.signals.sceneGraphChanged.dispatch()
+  }
 
-		this.object.geometry.dispose();
-		this.object.geometry = this.newGeometry;
-		this.object.geometry.computeBoundingSphere();
+  update(cmd) {
+    this.newGeometry = cmd.newGeometry
+  }
 
-		this.editor.signals.geometryChanged.dispatch( this.object );
-		this.editor.signals.sceneGraphChanged.dispatch();
+  toJSON() {
+    const output = super.toJSON(this)
 
-	}
+    output.objectUuid = this.object.uuid
+    output.oldGeometry = this.object.geometry.toJSON()
+    output.newGeometry = this.newGeometry.toJSON()
 
-	undo() {
+    return output
+  }
 
-		this.object.geometry.dispose();
-		this.object.geometry = this.oldGeometry;
-		this.object.geometry.computeBoundingSphere();
+  fromJSON(json) {
+    super.fromJSON(json)
 
-		this.editor.signals.geometryChanged.dispatch( this.object );
-		this.editor.signals.sceneGraphChanged.dispatch();
+    this.object = this.editor.objectByUuid(json.objectUuid)
 
-	}
+    this.oldGeometry = parseGeometry(json.oldGeometry)
+    this.newGeometry = parseGeometry(json.newGeometry)
 
-	update( cmd ) {
-
-		this.newGeometry = cmd.newGeometry;
-
-	}
-
-	toJSON() {
-
-		const output = super.toJSON( this );
-
-		output.objectUuid = this.object.uuid;
-		output.oldGeometry = this.object.geometry.toJSON();
-		output.newGeometry = this.newGeometry.toJSON();
-
-		return output;
-
-	}
-
-	fromJSON( json ) {
-
-		super.fromJSON( json );
-
-		this.object = this.editor.objectByUuid( json.objectUuid );
-
-		this.oldGeometry = parseGeometry( json.oldGeometry );
-		this.newGeometry = parseGeometry( json.newGeometry );
-
-		function parseGeometry( data ) {
-
-			const loader = new ObjectLoader();
-			return loader.parseGeometries( [ data ] )[ data.uuid ];
-
-		}
-
-	}
-
+    function parseGeometry(data) {
+      const loader = new ObjectLoader()
+      return loader.parseGeometries([data])[data.uuid]
+    }
+  }
 }
 
-export { SetGeometryCommand };
+export { SetGeometryCommand }
